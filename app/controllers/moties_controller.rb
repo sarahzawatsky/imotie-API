@@ -1,22 +1,24 @@
-class MotiesController < ApplicationController
-  before_action :set_moty, only: [:show, :update, :destroy]
+# frozen_string_literal: true
+
+class MotiesController < ProtectedController
+  before_action :set_moty, only: %i[show update destroy]
 
   # GET /moties
   def index
-    @moties = Motie.all
+    @moties = current_user.moties.all
+    # @moties = current_user.Moty.all
 
     render json: @moties
   end
 
   # GET /moties/1
   def show
-    render json: @moty
+    render json: current_user.moties.find(params[:id])
   end
 
   # POST /moties
   def create
-    @moty = Motie.new(moty_params)
-
+    @moty = current_user.moties.build(moty_params)
     if @moty.save
       render json: @moty, status: :created, location: @moty
     else
@@ -36,16 +38,19 @@ class MotiesController < ApplicationController
   # DELETE /moties/1
   def destroy
     @moty.destroy
+
+    head :no_content
   end
 
   private
-    # Use callbacks to share common setup or constraints between actions.
-    def set_moty
-      @moty = Motie.find(params[:id])
-    end
 
-    # Only allow a trusted parameter "white list" through.
-    def moty_params
-      params.require(:moty).permit(:emotion, :intensity, :cause, :appearance, :solution)
-    end
+  # Use callbacks to share common setup or constraints between actions.
+  def set_moty
+    @moty = current_user.moties.find(params[:id])
+  end
+
+  # Only allow a trusted parameter "white list" through.
+  def moty_params
+    params.require(:moty).permit(:emotion, :intensity, :cause, :appearance, :solution)
+  end
 end
